@@ -1,11 +1,15 @@
 #NB == place for improvment
-
+#NW == not working right now
+import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten
 from tensorflow.keras.layers import Conv2D, MaxPooling2D
 from tensorflow.keras.callbacks import TensorBoard
 import pickle
-import time
+#NW import time
+
+CATEGORIES = ["X", "1", "2", "3", "4", "5", "6"]
+CLASS_SIZE = np.array(CATEGORIES).shape[0]
 
 #read pickle
 pickle_in = open("X.pickle","rb")
@@ -26,7 +30,7 @@ conv_layers = [2]
 for dense_layer in dense_layers:
     for layer_size in layer_sizes:
         for conv_layer in conv_layers:
-            NAME = "{}-conv-{}-nodes-{}-dense-{}".format(conv_layer, layer_size, dense_layer, int(time.time())) #create unique name
+            #NW NAME = "{}-conv-{}-nodes-{}-dense-{}".format(conv_layer, layer_size, dense_layer, int(time.time())) #create unique name
 
             model = Sequential() #sequential network - one input and one output
 
@@ -46,12 +50,12 @@ for dense_layer in dense_layers:
                 model.add(Dense(layer_size)) #adding neuron layer use_bias?
                 model.add(Activation('relu')) #NB relu activation function; can be added in line above?
 
-            model.add(Dense(1)) #output layer
+            model.add(Dense(CLASS_SIZE)) #output layer
             model.add(Activation('sigmoid')) #NB sigmoid output activation
 
-            tensorboard = TensorBoard(log_dir="logs/{}".format(NAME)) #log files generator
+            #NW tensorboard = TensorBoard(log_dir="logs/{}".format(NAME)) #log files generator
 
-            model.compile(loss='binary_crossentropy', #NB loss calculation
+            model.compile(loss='categorical_crossentropy', #NB loss calculation
                           optimizer = 'adam', #NB standard optimizer
                           metrics = ['accuracy']) #NB what to optimize
 
@@ -59,4 +63,6 @@ for dense_layer in dense_layers:
                       batch_size = 32, #NB number of used training images
                       epochs  = 3, #NB number of cycles
                       validation_split = 0.3) #NB fraction of batch data note used for training - only for validation
-                      #callbacks = [tensorboard])  #NB log files not working right now
+                      #NW callbacks = [tensorboard])  #NB log files
+
+model.save('Neural_Network_Proj_2.model')
