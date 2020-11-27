@@ -18,6 +18,14 @@ y = []
 
 IMG_SIZE = 100 #image dimensions
 
+#preparation for data augmentation
+rotate = iaa.Affine(rotate=(-50, 30))
+gaussian_noise = iaa.AdditiveGaussianNoise(10,20)
+crop = iaa.Crop(percent=(0, 0.3))
+flip_hr = iaa.Fliplr(p=1.0)
+flip_vr = iaa.Flipud(p=1.0)
+contrast = iaa.GammaContrast(gamma=2.0)
+
 for category in CATEGORIES: #loop subdirectories
     path = os.path.join(DATADIR, category) #create path
     class_num = CATEGORIES.index(category) #turn types(subdirectiories) into numbers
@@ -31,39 +39,42 @@ for category in CATEGORIES: #loop subdirectories
         X.append(image) 
         y.append(class_num)
         
-        #increase dataset
-        rotate = iaa.Affine(rotate=(-50, 30))
+        #increase dataset by data augmentation
+        #rotation
         rot_img = rotate.augment_image(image)
-        X.append(prepare(rot_img)) 
+        X.append(rot_img)
         y.append(class_num)
 
-        gaussian_noise = iaa.AdditiveGaussianNoise(10,20)
-        noise_img=gaussian_noise.augment_image(image)
-        X.append(prepare(noise_img)) 
+        #Gaussian noise
+        noise_img = gaussian_noise.augment_image(image)
+        X.append(noise_img)
         y.append(class_num)
 
-        crop = iaa.Crop(percent=(0, 0.3))
+        #crop
         crop_img = crop.augment_image(image)
-        X.append(prepare(crop_img)) 
+        X.append(crop_img)
         y.append(class_num)
 
-        flip_hr = iaa.Fliplr(p=1.0)
+        #horizontal flip
         fliph_image = flip_hr.augment_image(image)
-        X.append(prepare(fliph_image)) 
+        X.append(fliph_image)
         y.append(class_num)
 
-        flip_vr = iaa.Flipud(p=1.0)
+        #vertical flip
         flipv_image = flip_vr.augment_image(image)
-        X.append(prepare(flipv_image)) 
+        X.append(flipv_image)
         y.append(class_num)
 
-        contrast = iaa.GammaContrast(gamma=2.0)
+        #contrast decrease
         contrast_img = contrast.augment_image(image)
-        X.append(prepare(contrast_img)) 
+        X.append(contrast_img)
         y.append(class_num)
 
 X = np.array(X).reshape(-1, IMG_SIZE, IMG_SIZE, 1) #turn back to N (-1) IMG_SIZExIMG_SIZEx1 array -  2D picture where every pixel is separated
 y = np.array(y)
+
+#input scaling
+X = X / 255.0
 
 #pickle it
 pickle_out = open("X.pickle","wb")

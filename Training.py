@@ -18,8 +18,12 @@ X = pickle.load(pickle_in)
 pickle_in = open("y.pickle","rb")
 y = pickle.load(pickle_in)
 
-#rescale data
-X = X/255.0
+#manual data shuffle - X and y must preserve equal order
+indices = np.arange(X.shape[0])
+np.random.shuffle(indices)
+
+X = X[indices]
+y = y[indices]
 
 #network parameters
 dense_layers = [1]
@@ -55,14 +59,15 @@ for dense_layer in dense_layers:
 
             #NW tensorboard = TensorBoard(log_dir="logs/{}".format(NAME)) #log files generator
 
-            model.compile(loss='categorical_crossentropy', #NB loss calculation
+            model.compile(loss='sparse_categorical_crossentropy', #NB loss calculation
                           optimizer = 'adam', #NB standard optimizer
                           metrics = ['accuracy']) #NB what to optimize
 
             model.fit(X, y, #training
                       batch_size = 32, #NB number of used training images
                       epochs  = 3, #NB number of cycles
-                      validation_split = 0.3) #NB fraction of batch data note used for training - only for validation
+                      shuffle = True, #shuffle data
+                      validation_split = 0.1) #NB fraction of batch data note used for training - only for validation
                       #NW callbacks = [tensorboard])  #NB log files
 
 model.save('Neural_Network_Proj_2.model')
