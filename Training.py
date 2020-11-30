@@ -2,8 +2,7 @@
 #NW == not working right now
 import numpy as np
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten
-from tensorflow.keras.layers import Conv2D, MaxPooling2D
+from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten, Conv2D, MaxPooling2D, BatchNormalization
 from tensorflow.keras.callbacks import TensorBoard
 import pickle
 #NW import time
@@ -39,23 +38,22 @@ for dense_layer in dense_layers:
             model = Sequential() #sequential network - one input and one output
 
             #first layer needs input_shape - IMG_SIZExIMG_SIZEx1 (just like in Pickle_gen.py)
-            model.add(Conv2D(layer_size, (3, 3), input_shape = X.shape[1:])) #NB convolution use_bias?
-            model.add(Activation('relu')) #NB relu activation function; can be added in line above?
+            model.add(Conv2D(layer_size, (3, 3), input_shape = X.shape[1:], use_bias = False, activation = 'relu')) #NB convolution #NB relu activation function; ReLU is very good for FPGA; can be added in line above? (not important)
             model.add(MaxPooling2D(pool_size = (2, 2))) #NB pooling
+            model.add(BatchNormalization()) #NB batchnorm (goes after activation) - reduce epoch number \ dropout - dropping nodes
 
             for l in range(conv_layer-1):
-                model.add(Conv2D(layer_size, (3, 3)))
-                model.add(Activation('relu'))
+                model.add(Conv2D(layer_size, (3, 3), use_bias = False, activation = 'relu'))
                 model.add(MaxPooling2D(pool_size = (2, 2)))
+                model.add(BatchNormalization())
 
             model.add(Flatten()) #flattening input - turning 2D image into 1D array
 
             for _ in range(dense_layer):
-                model.add(Dense(layer_size)) #adding neuron layer use_bias?
-                model.add(Activation('relu')) #NB relu activation function; can be added in line above?
+                model.add(Dense(layer_size, use_bias = False, activation = 'relu')) #adding neuron layer use_bias?
+                model.add(BatchNormalization())
 
-            model.add(Dense(CLASS_SIZE)) #output layer
-            model.add(Activation('sigmoid')) #NB sigmoid output activation
+            model.add(Dense(CLASS_SIZE, use_bias = False, activation = 'softmax')) #output layer #not sigmoid output activation -- relu is better for FPGA!
 
             #NW tensorboard = TensorBoard(log_dir="logs/{}".format(NAME)) #log files generator
 
