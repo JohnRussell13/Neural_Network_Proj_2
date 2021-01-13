@@ -18,13 +18,20 @@ y = []
 
 IMG_SIZE = 100 #image dimensions
 
-#preparation for data augmentation
-#rotate = iaa.Affine(rotate=(-50, 30))
-#gaussian_noise = iaa.AdditiveGaussianNoise(10,20)
-#crop = iaa.Crop(percent=(0, 0.3))
-#flip_hr = iaa.Fliplr(p=1.0)
-#flip_vr = iaa.Flipud(p=1.0)
-#contrast = iaa.GammaContrast(gamma=2.0)
+def col_conv(img):
+  a, b, c = [1,1,1]
+  new_img = np.zeros((IMG_SIZE,IMG_SIZE))
+  for i in range(IMG_SIZE):
+    for j in range(IMG_SIZE):
+      a = int(img[i][j][0])
+      b = int(img[i][j][1])
+      c = int(img[i][j][2])
+      a = a*a
+      b = b*b
+      c = c*c
+      if a > 0 and b > 0 and c > 0:
+        new_img[i][j] = int(np.sqrt(3/(1/a+1/b+1/c)))
+  return new_img
 
 for category in CATEGORIES: #loop subdirectories
     path = os.path.join(DATADIR, category) #create path
@@ -32,43 +39,14 @@ for category in CATEGORIES: #loop subdirectories
 
     for img in tqdm(os.listdir(path)): #loop images
         #read image
-        img_array = cv2.imread(os.path.join(path,img) ,cv2.IMREAD_GRAYSCALE) #convert to array
+        img_array = cv2.imread(os.path.join(path,img) ,cv2.IMREAD_COLOR ) #convert to array
+
         image = cv2.resize(img_array, (IMG_SIZE, IMG_SIZE)) #resize
-        
+        image = col_conv(image)
+        image = np.ubyte(image)
         #add to main array
         X.append(image) 
         y.append(class_num)
-        
-#        #increase dataset by data augmentation
-#        #rotation
-#        rot_img = rotate.augment_image(image)
-#        X.append(rot_img)
-#        y.append(class_num)
-#
-#        #Gaussian noise
-#        noise_img = gaussian_noise.augment_image(image)
-#        X.append(noise_img)
-#        y.append(class_num)
-#
-#        #crop
-#        crop_img = crop.augment_image(image)
-#        X.append(crop_img)
-#        y.append(class_num)
-#
-#        #horizontal flip
-#        fliph_image = flip_hr.augment_image(image)
-#        X.append(fliph_image)
-#        y.append(class_num)
-#
-#        #vertical flip
-#        flipv_image = flip_vr.augment_image(image)
-#        X.append(flipv_image)
-#        y.append(class_num)
-#
-#        #contrast decrease
-#        contrast_img = contrast.augment_image(image)
-#        X.append(contrast_img)
-#        y.append(class_num)
 #
 #X = np.array(X).reshape(-1, IMG_SIZE, IMG_SIZE, 1) #turn back to N (-1) IMG_SIZExIMG_SIZEx1 array -  2D picture where every pixel is separated
 #y = np.array(y)
