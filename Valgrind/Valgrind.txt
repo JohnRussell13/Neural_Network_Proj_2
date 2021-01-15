@@ -1,0 +1,18 @@
+FUNC		SIZE	COMMENT	IN FINAL	CAN IMPROVE	PRIORITY
+read		40M	for params	YN	N		
+read_b		30M	for image		YN	N		
+img_read		4M	for testing	N			
+img_read_b	31M	for image		Y	N		
+reader		36M	for params	YN	N		
+conv2D		10M	for neural		Y	Y		1
+pooling		200K	for neural		Y	Y		3
+dense		2M	for neural		Y	Y		2
+printm		X	for testing	N			
+printmm		X	for testing	N			
+lin_interp		1K	for image		Y	Y		7
+lin_interp2	X	X		N			
+traspose		13K	for image		Y	Y		6
+resize		6M	for image		Y	Y		4
+grad		3M	for image		Y	Y		5
+preproces	9M	for image		Y	Y		
+main		92M	all		Y			
